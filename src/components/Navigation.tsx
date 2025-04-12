@@ -16,7 +16,8 @@ import {
   ImageIcon, 
   MicIcon, 
   HeartPulse, 
-  Info 
+  Info,
+  CalendarClock
 } from 'lucide-react';
 
 const Navigation = () => {
@@ -57,24 +58,31 @@ const Navigation = () => {
             <NavigationMenuItem>
               <NavigationMenuTrigger>
                 <Info className="h-4 w-4 mr-2" />
-                Resources
+                Features
               </NavigationMenuTrigger>
               <NavigationMenuContent>
                 <div className="w-[300px] p-4 grid gap-3">
-                  <div className="p-2 hover:bg-accent rounded-md transition-colors">
+                  <Link to="/image-analysis" className="p-2 hover:bg-accent rounded-md transition-colors">
                     <h3 className="font-medium mb-1 flex items-center">
                       <ImageIcon className="h-4 w-4 mr-2 text-mind-purple" />
                       Image Analysis
                     </h3>
                     <p className="text-sm text-slate-500">Upload doodles or images for emotional insights</p>
-                  </div>
-                  <div className="p-2 hover:bg-accent rounded-md transition-colors">
+                  </Link>
+                  <Link to="/voice-interaction" className="p-2 hover:bg-accent rounded-md transition-colors">
                     <h3 className="font-medium mb-1 flex items-center">
                       <MicIcon className="h-4 w-4 mr-2 text-mind-green" />
                       Voice Interaction
                     </h3>
                     <p className="text-sm text-slate-500">Speak directly to Mindful Muse</p>
-                  </div>
+                  </Link>
+                  <Link to="/schedule-checkin" className="p-2 hover:bg-accent rounded-md transition-colors">
+                    <h3 className="font-medium mb-1 flex items-center">
+                      <CalendarClock className="h-4 w-4 mr-2 text-mind-blue" />
+                      Schedule Check-in
+                    </h3>
+                    <p className="text-sm text-slate-500">Set up regular wellness sessions</p>
+                  </Link>
                 </div>
               </NavigationMenuContent>
             </NavigationMenuItem>
