@@ -10,8 +10,10 @@ import {
   Clock, 
   Calendar, 
   Lightbulb,
-  MessageCircle
+  MessageCircle,
+  Image as ImageIcon
 } from 'lucide-react';
+import MoodActivity from '@/components/MoodActivity';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 const Dashboard = () => {
