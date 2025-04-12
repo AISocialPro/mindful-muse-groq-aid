@@ -6,9 +6,10 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './ui/card'
 import { Textarea } from './ui/textarea';
 import { ScrollArea } from './ui/scroll-area';
 import { sendMessageToGroq, analyzeText } from '../services/groqService';
-import { Mic, Send, RefreshCw } from 'lucide-react';
+import { Mic, Send, RefreshCw, Sparkles, Clock } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
+import { formatDistanceToNow } from 'date-fns';
 
 interface ChatInterfaceProps {
   onVoiceInputRequest?: () => void;
@@ -35,6 +36,10 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onVoiceInputRequest }) =>
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const formatMessageTime = (timestamp: Date) => {
+    return formatDistanceToNow(timestamp, { addSuffix: true });
+  };
+
   const handleSendMessage = async () => {
     if (!input.trim()) return;
     
@@ -50,11 +55,17 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onVoiceInputRequest }) =>
     setIsLoading(true);
     
     try {
+      // Simulate typing delay for more natural feeling
+      const typingDelay = Math.max(1000, Math.min(input.length * 30, 2000));
+      
       // Analyze the text sentiment first
       const analysis = await analyzeText(input);
       
-      // Get response from Groq
+      // Get response from Groq (or our simulated version)
       const response = await sendMessageToGroq([...messages, userMessage]);
+      
+      // Artificial delay to simulate typing
+      await new Promise(resolve => setTimeout(resolve, typingDelay));
       
       const aiMessage: Message = {
         id: uuidv4(),
@@ -97,12 +108,15 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onVoiceInputRequest }) =>
 
   return (
     <Card className="glass-card w-full max-w-3xl mx-auto shadow-lg">
-      <CardHeader>
-        <CardTitle className="text-xl font-medium text-center">Chat with Mindful Muse</CardTitle>
+      <CardHeader className="border-b">
+        <CardTitle className="text-xl font-medium text-center flex items-center justify-center gap-2">
+          <Sparkles className="h-5 w-5 text-mind-blue" />
+          Chat with Mindful Muse
+        </CardTitle>
       </CardHeader>
-      <CardContent>
-        <ScrollArea className="h-[400px] pr-4">
-          <div className="space-y-4">
+      <CardContent className="p-0">
+        <ScrollArea className="h-[400px] px-4">
+          <div className="space-y-4 py-4">
             {messages.map((message) => (
               <div 
                 key={message.id} 
@@ -115,14 +129,23 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onVoiceInputRequest }) =>
                       : 'bg-slate-100 text-slate-800 mr-12'
                   }`}
                 >
-                  {message.content}
+                  <div className="flex flex-col">
+                    <div className="mb-1">{message.content}</div>
+                    <div className="text-xs opacity-70 flex items-center mt-1">
+                      <Clock className="h-3 w-3 inline mr-1" />
+                      {formatMessageTime(message.timestamp)}
+                    </div>
+                  </div>
                 </div>
               </div>
             ))}
             {isLoading && (
               <div className="flex justify-start fade-in">
                 <div className="rounded-2xl px-4 py-3 bg-slate-100 text-slate-800">
-                  <RefreshCw className="h-5 w-5 animate-spin" />
+                  <div className="flex items-center space-x-2">
+                    <RefreshCw className="h-4 w-4 animate-spin" />
+                    <span>Thinking...</span>
+                  </div>
                 </div>
               </div>
             )}
@@ -133,7 +156,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onVoiceInputRequest }) =>
       <CardFooter className="border-t p-4">
         <div className="flex w-full gap-2">
           <Textarea
-            className="input-field flex-1 resize-none"
+            className="input-field flex-1 resize-none min-h-[60px]"
             placeholder="Type your message here..."
             value={input}
             onChange={(e) => setInput(e.target.value)}

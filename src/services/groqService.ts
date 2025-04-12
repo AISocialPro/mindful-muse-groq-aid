@@ -1,4 +1,3 @@
-
 import { Message, GroqResponse, ImageAnalysis, TextAnalysis } from '../types';
 
 // This would be replaced with an actual API key in a real implementation
@@ -8,40 +7,46 @@ const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 
 export const sendMessageToGroq = async (messages: Message[]): Promise<GroqResponse> => {
   try {
-    // Format messages for the API
+    // Since we don't have an actual API key, we'll simulate responses
+    // In a real implementation, this would be a fetch call to the Groq API
+    
+    // Format messages for simulation
     const formattedMessages = messages.map(msg => ({
       role: msg.role,
       content: msg.content
     }));
 
-    // Add system message for context
-    const systemMessage = {
-      role: "system",
-      content: "You are Mindful Muse, a compassionate and supportive AI companion focusing on mental wellbeing. Provide empathetic responses, practical advice, and gentle encouragement. Keep responses concise and supportive."
-    };
+    // Get the last user message
+    const lastUserMessage = formattedMessages
+      .filter(msg => msg.role === 'user')
+      .pop()?.content.toLowerCase() || '';
 
-    const response = await fetch(GROQ_API_URL, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${GROQ_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: "llama3-8b-8192",
-        messages: [systemMessage, ...formattedMessages],
-        temperature: 0.7,
-        max_tokens: 800
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error(`API error: ${response.status}`);
+    // Simulate API response based on user input
+    let responseText = "I'm here to help with your mental wellbeing. How are you feeling today?";
+    
+    if (lastUserMessage.includes('sad') || lastUserMessage.includes('depress') || lastUserMessage.includes('down')) {
+      responseText = "I'm sorry to hear you're feeling down. Remember that it's okay to not be okay sometimes. Would you like to talk more about what's troubling you, or perhaps try a quick mindfulness exercise?";
+    } else if (lastUserMessage.includes('anxious') || lastUserMessage.includes('stress') || lastUserMessage.includes('worried')) {
+      responseText = "Anxiety can be challenging. Try taking a few deep breaths with me - breathe in for 4 counts, hold for 4, and exhale for 6. This can help activate your parasympathetic nervous system and bring some calm.";
+    } else if (lastUserMessage.includes('happy') || lastUserMessage.includes('good') || lastUserMessage.includes('great')) {
+      responseText = "I'm glad to hear you're doing well! It's wonderful to celebrate these positive moments. What's been contributing to your good mood lately?";
+    } else if (lastUserMessage.includes('tired') || lastUserMessage.includes('exhausted') || lastUserMessage.includes('sleep')) {
+      responseText = "Rest is so important for our mental health. Are you getting enough quality sleep? Sometimes establishing a calming bedtime routine can help improve sleep quality.";
+    } else if (lastUserMessage.includes('hello') || lastUserMessage.includes('hi') || lastUserMessage.includes('hey')) {
+      responseText = "Hello! I'm Mindful Muse, your AI companion for mental wellness. How are you feeling today?";
+    } else if (lastUserMessage.includes('bye') || lastUserMessage.includes('goodbye')) {
+      responseText = "Take care! Remember to be kind to yourself. I'm here whenever you need to talk.";
+    } else if (lastUserMessage.includes('help') || lastUserMessage.includes('support')) {
+      responseText = "I'm here to support you. We can chat about your feelings, try some mindfulness exercises, or I can offer some gentle suggestions. What would be most helpful right now?";
+    } else if (lastUserMessage.includes('thank')) {
+      responseText = "You're very welcome! I'm glad I could be of help.";
+    } else if (lastUserMessage) {
+      // For any other input, provide a thoughtful response
+      responseText = "Thank you for sharing that with me. Your feelings and experiences are valid. Would you like to explore this topic further, or perhaps try a different approach to support your wellbeing today?";
     }
 
-    const data = await response.json();
-    
     return {
-      text: data.choices[0].message.content
+      text: responseText
     };
   } catch (error) {
     console.error('Error communicating with Groq:', error);
