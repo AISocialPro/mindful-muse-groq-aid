@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 const FeatureCard: React.FC<FeatureCardProps> = ({ title, description, icon, onClick }) => {
   return (
     <motion.div
-      whileHover={{ scale: 1.03 }}
+      whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.98 }}
       transition={{ type: "spring", stiffness: 300, damping: 15 }}
     >
@@ -19,7 +19,7 @@ const FeatureCard: React.FC<FeatureCardProps> = ({ title, description, icon, onC
         <div className="absolute -left-12 -bottom-12 w-24 h-24 rounded-full bg-gradient-calm opacity-10 blur-xl group-hover:opacity-30 transition-opacity"></div>
         
         <CardHeader className="pb-2 relative z-10">
-          <div className="feature-icon mb-4 w-fit transform group-hover:scale-110 transition-transform duration-300">
+          <div className="feature-icon mb-4 w-fit transform group-hover:scale-110 transition-transform duration-300 group-hover:rotate-3">
             {icon}
           </div>
           <CardTitle className="text-xl font-semibold group-hover:text-mind-blue transition-colors">
