@@ -19,7 +19,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onVoiceInputRequest }) =>
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 'welcome',
-      content: "Hello! I'm Mindful Muse, your AI wellness companion. How are you feeling today?",
+      content: "Hello! I'm Mindful Muse powered by Groq AI. How are you feeling today?",
       role: 'assistant',
       timestamp: new Date()
     }
@@ -58,10 +58,10 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onVoiceInputRequest }) =>
       // Simulate typing delay for more natural feeling
       const typingDelay = Math.max(1000, Math.min(input.length * 30, 2000));
       
-      // Analyze the text sentiment first
+      // Analyze the text sentiment first using Groq
       const analysis = await analyzeText(input);
       
-      // Get response from Groq (or our simulated version)
+      // Get response from Groq
       const response = await sendMessageToGroq([...messages, userMessage]);
       
       // Artificial delay to simulate typing
@@ -100,7 +100,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onVoiceInputRequest }) =>
       }
     } catch (error) {
       console.error('Error sending message:', error);
-      toast.error("I'm having trouble connecting. Please try again in a moment.");
+      toast.error("I'm having trouble connecting to Groq AI. Please try again in a moment.");
     } finally {
       setIsLoading(false);
     }
@@ -111,7 +111,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onVoiceInputRequest }) =>
       <CardHeader className="border-b">
         <CardTitle className="text-xl font-medium text-center flex items-center justify-center gap-2">
           <Sparkles className="h-5 w-5 text-mind-blue" />
-          Chat with Mindful Muse
+          Chat with Mindful Muse (Powered by Groq AI)
         </CardTitle>
       </CardHeader>
       <CardContent className="p-0">
@@ -144,7 +144,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onVoiceInputRequest }) =>
                 <div className="rounded-2xl px-4 py-3 bg-slate-100 text-slate-800">
                   <div className="flex items-center space-x-2">
                     <RefreshCw className="h-4 w-4 animate-spin" />
-                    <span>Thinking...</span>
+                    <span>Groq AI is thinking...</span>
                   </div>
                 </div>
               </div>

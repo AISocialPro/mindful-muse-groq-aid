@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from './ui/card'
 import { Button } from './ui/button';
 import { ImageAnalysis as ImageAnalysisType } from '../types';
 import { analyzeImage } from '../services/groqService';
-import { ImageIcon, Upload, RefreshCw, Sparkles } from 'lucide-react';
+import { Image as ImageIcon, Upload, RefreshCw, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 
 const ImageAnalysis: React.FC = () => {
@@ -114,7 +114,7 @@ const ImageAnalysis: React.FC = () => {
             {isLoading ? (
               <div className="flex flex-col items-center justify-center h-full">
                 <RefreshCw className="h-8 w-8 text-mind-purple animate-spin mb-4" />
-                <p className="text-slate-600">Analyzing your image...</p>
+                <p className="text-slate-600">Analyzing your image with Groq AI...</p>
               </div>
             ) : analysis ? (
               <div className="fade-in">
@@ -142,7 +142,7 @@ const ImageAnalysis: React.FC = () => {
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center h-full text-slate-500">
-                <p>Upload an image to see the analysis</p>
+                <p>Upload an image to see the Groq AI analysis</p>
               </div>
             )}
           </div>

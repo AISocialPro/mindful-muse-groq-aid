@@ -33,6 +33,7 @@ const VoiceInput: React.FC<VoiceInputProps> = ({ isOpen, onClose, onTranscript }
         chunksRef.current = [];
         
         try {
+          toast("Processing with Groq AI...");
           const transcript = await processVoiceInput(audioBlob);
           onTranscript(transcript);
           
@@ -78,7 +79,7 @@ const VoiceInput: React.FC<VoiceInputProps> = ({ isOpen, onClose, onTranscript }
         timerRef.current = null;
       }
       
-      toast("Processing your voice message...");
+      toast("Processing your voice message with Groq AI...");
     }
   };
 
@@ -99,7 +100,7 @@ const VoiceInput: React.FC<VoiceInputProps> = ({ isOpen, onClose, onTranscript }
     <Dialog open={isOpen} onOpenChange={handleDialogClose}>
       <DialogContent className="sm:max-w-md glass-card">
         <DialogHeader>
-          <DialogTitle className="text-center">Voice Input</DialogTitle>
+          <DialogTitle className="text-center">Voice Input with Groq AI</DialogTitle>
         </DialogHeader>
         
         <div className="flex flex-col items-center justify-center py-6">
@@ -120,7 +121,7 @@ const VoiceInput: React.FC<VoiceInputProps> = ({ isOpen, onClose, onTranscript }
               <p className="text-slate-600 mb-4">Click the microphone to start recording</p>
               <div className="flex justify-center gap-2 text-xs text-slate-500 mb-4">
                 <AlertCircle className="h-4 w-4" />
-                <p>Speak clearly and I'll convert your voice to text</p>
+                <p>Speak clearly and Groq AI will convert your voice to text</p>
               </div>
             </div>
           )}

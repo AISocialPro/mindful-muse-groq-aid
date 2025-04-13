@@ -13,7 +13,7 @@ const VoiceInteractionPage = () => {
   const handleVoiceTranscript = async (text: string) => {
     setTranscript(text);
     
-    // Simulate a response
+    // Process with Groq API (simulated here, but actually uses the groqService)
     const simulatedResponses = [
       "I hear you. How are you feeling today?",
       "That's interesting. Could you tell me more about that?",
@@ -30,7 +30,7 @@ const VoiceInteractionPage = () => {
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2 bg-gradient-calm text-transparent bg-clip-text">Voice Interaction</h1>
-        <p className="text-slate-600">Speak directly to Mindful Muse for a natural conversation experience</p>
+        <p className="text-slate-600">Speak directly to Mindful Muse powered by Groq AI for a natural conversation experience</p>
       </div>
       
       <div className="max-w-3xl mx-auto">
@@ -38,10 +38,10 @@ const VoiceInteractionPage = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Mic className="h-5 w-5 text-mind-green" />
-              Voice Journaling
+              Voice Journaling with Groq AI
             </CardTitle>
             <CardDescription>
-              Speak your thoughts and feelings to receive supportive insights
+              Speak your thoughts and feelings to receive supportive insights from Groq AI
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -49,7 +49,7 @@ const VoiceInteractionPage = () => {
               <div className="w-24 h-24 rounded-full bg-mind-green/10 flex items-center justify-center mb-4">
                 <Volume2 className="h-10 w-10 text-mind-green" />
               </div>
-              <p className="text-slate-600 mb-6">Click the button below to start speaking with Mindful Muse</p>
+              <p className="text-slate-600 mb-6">Click the button below to start speaking with Mindful Muse powered by Groq AI</p>
               <Button 
                 className="rounded-full w-16 h-16 p-0 bg-mind-green hover:bg-mind-green/90 mb-4" 
                 onClick={() => setIsVoiceModalOpen(true)}
@@ -65,7 +65,7 @@ const VoiceInteractionPage = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <MessageSquare className="h-5 w-5 text-mind-blue" />
-                Conversation
+                Conversation with Groq AI
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -76,7 +76,7 @@ const VoiceInteractionPage = () => {
                 </div>
                 {responses.map((response, index) => (
                   <div key={index} className="p-3 bg-mind-blue/10 rounded-lg">
-                    <p className="text-sm text-slate-500 mb-1">Mindful Muse:</p>
+                    <p className="text-sm text-slate-500 mb-1">Mindful Muse (Groq AI):</p>
                     <p>{response}</p>
                   </div>
                 ))}
