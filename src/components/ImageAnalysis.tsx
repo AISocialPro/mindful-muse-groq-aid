@@ -4,10 +4,14 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from './ui/card'
 import { Button } from './ui/button';
 import { ImageAnalysis as ImageAnalysisType } from '../types';
 import { analyzeImage } from '../services/groqService';
-import { Image as ImageIcon, Upload, RefreshCw, Sparkles } from 'lucide-react';
+import { Image as ImageIcon, Upload, RefreshCw, Sparkles, Clock, Key } from 'lucide-react';
 import { toast } from 'sonner';
 
-const ImageAnalysis: React.FC = () => {
+interface ImageAnalysisProps {
+  apiKey?: string;
+}
+
+const ImageAnalysis: React.FC<ImageAnalysisProps> = ({ apiKey }) => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [analysis, setAnalysis] = useState<ImageAnalysisType | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -40,11 +44,18 @@ const ImageAnalysis: React.FC = () => {
   };
 
   const analyzeUploadedImage = async (base64: string) => {
+    if (!apiKey) {
+      toast.error("Please set your Groq API key in the settings first", {
+        description: "Click the settings icon in the top right to add your API key"
+      });
+      return;
+    }
+    
     setIsLoading(true);
     setAnalysis(null);
     
     try {
-      const result = await analyzeImage(base64);
+      const result = await analyzeImage(base64, apiKey);
       setAnalysis(result);
     } catch (error) {
       console.error('Error analyzing image:', error);
@@ -65,6 +76,16 @@ const ImageAnalysis: React.FC = () => {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        {!apiKey && (
+          <div className="bg-amber-50 border border-amber-200 p-4 rounded-lg mb-4 text-center">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <Key className="h-5 w-5 text-amber-500" />
+              <p className="font-medium text-amber-700">API Key Required</p>
+            </div>
+            <p className="text-sm text-amber-600">Please set your Groq API key in the settings to enable image analysis.</p>
+          </div>
+        )}
+        
         <div className="text-center mb-4 text-slate-600">
           Upload a drawing, doodle, or any image that represents your mood
         </div>
@@ -103,7 +124,7 @@ const ImageAnalysis: React.FC = () => {
             <Button 
               onClick={handleButtonClick}
               className="mt-4 bg-mind-green hover:bg-mind-green/90"
-              disabled={isLoading}
+              disabled={isLoading || !apiKey}
             >
               <Upload className="h-5 w-5 mr-2" />
               {selectedImage ? 'Choose Another Image' : 'Upload Image'}

@@ -1,12 +1,18 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import ImageAnalysis from '@/components/ImageAnalysis';
-import { Image as ImageIcon, PencilLine, Camera, FileImage } from 'lucide-react';
+import { Image as ImageIcon, PencilLine, Camera, FileImage, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 const ImageAnalysisPage = () => {
+  const [groqApiKey, setGroqApiKey] = useState<string>(() => {
+    return localStorage.getItem('groq_api_key') || '';
+  });
+  const [isApiKeyDialogOpen, setIsApiKeyDialogOpen] = useState(false);
+
   const examples = [
     { title: "Doodle", description: "Upload a simple doodle that represents your feelings", icon: <PencilLine className="h-5 w-5" /> },
     { title: "Photo", description: "Share a photo that captures your mood", icon: <Camera className="h-5 w-5" /> },
@@ -20,11 +26,29 @@ const ImageAnalysisPage = () => {
     });
   };
 
+  const saveApiKey = () => {
+    localStorage.setItem('groq_api_key', groqApiKey);
+    setIsApiKeyDialogOpen(false);
+    toast.success("API key saved successfully!", {
+      description: "Your Groq API key has been saved for this session"
+    });
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2 bg-gradient-calm text-transparent bg-clip-text">Image Analysis</h1>
-        <p className="text-slate-600">Upload doodles or images that represent your mood for insights powered by Groq AI</p>
+      <div className="mb-8 flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold mb-2 bg-gradient-calm text-transparent bg-clip-text">Image Analysis</h1>
+          <p className="text-slate-600">Upload doodles or images that represent your mood for insights powered by Groq AI</p>
+        </div>
+        <Button 
+          variant="outline" 
+          size="icon" 
+          className="hover:bg-slate-100"
+          onClick={() => setIsApiKeyDialogOpen(true)}
+        >
+          <Settings className="h-5 w-5" />
+        </Button>
       </div>
       
       <div className="max-w-4xl mx-auto">
@@ -80,8 +104,36 @@ const ImageAnalysisPage = () => {
           </div>
         </div>
         
-        <ImageAnalysis />
+        <ImageAnalysis apiKey={groqApiKey} />
       </div>
+
+      <Dialog open={isApiKeyDialogOpen} onOpenChange={setIsApiKeyDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Set your Groq API Key</DialogTitle>
+            <DialogDescription>
+              Enter your Groq API key to enable AI analysis features.
+              You can get an API key from <a href="https://console.groq.com/" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">Groq's website</a>.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="flex flex-col gap-2">
+              <Input
+                type="password"
+                placeholder="Enter your Groq API key"
+                value={groqApiKey}
+                onChange={(e) => setGroqApiKey(e.target.value)}
+              />
+              <p className="text-xs text-slate-500">Your API key is stored locally and never sent to our servers.</p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button type="submit" onClick={saveApiKey} disabled={!groqApiKey.trim()}>
+              Save Key
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

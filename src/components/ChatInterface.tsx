@@ -6,16 +6,19 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './ui/card'
 import { Textarea } from './ui/textarea';
 import { ScrollArea } from './ui/scroll-area';
 import { sendMessageToGroq, analyzeText } from '../services/groqService';
-import { Mic, Send, RefreshCw, Sparkles, Clock, HelpCircle, MessageSquare } from 'lucide-react';
+import { Mic, Send, RefreshCw, Sparkles, Clock, HelpCircle, MessageSquare, Key, Settings } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 
 interface ChatInterfaceProps {
   onVoiceInputRequest?: () => void;
+  apiKey?: string;
 }
 
-const ChatInterface: React.FC<ChatInterfaceProps> = ({ onVoiceInputRequest }) => {
+const ChatInterface: React.FC<ChatInterfaceProps> = ({ onVoiceInputRequest, apiKey }) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 'welcome',
@@ -27,6 +30,10 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onVoiceInputRequest }) =>
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isApiKeyDialogOpen, setIsApiKeyDialogOpen] = useState(false);
+  const [groqApiKey, setGroqApiKey] = useState<string>(() => {
+    return localStorage.getItem('groq_api_key') || '';
+  });
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
   const suggestedPrompts = [
@@ -48,6 +55,14 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onVoiceInputRequest }) =>
     return formatDistanceToNow(timestamp, { addSuffix: true });
   };
 
+  const saveApiKey = () => {
+    localStorage.setItem('groq_api_key', groqApiKey);
+    setIsApiKeyDialogOpen(false);
+    toast.success("API key saved successfully!", {
+      description: "Your Groq API key has been saved for this session"
+    });
+  };
+
   const handleSendMessage = async (text?: string) => {
     const messageToSend = text || input;
     if (!messageToSend.trim()) return;
@@ -65,14 +80,22 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onVoiceInputRequest }) =>
     setShowSuggestions(false);
     
     try {
+      // Check if API key is available
+      const activeApiKey = apiKey || groqApiKey;
+      if (!activeApiKey) {
+        toast.error("Please set your Groq API key in settings", {
+          description: "Click the settings icon to add your API key"
+        });
+      }
+      
       // Simulate typing delay for more natural feeling
       const typingDelay = Math.max(1000, Math.min(messageToSend.length * 30, 2000));
       
       // Analyze the text sentiment first using Groq
-      const analysis = await analyzeText(messageToSend);
+      const analysis = await analyzeText(messageToSend, activeApiKey);
       
       // Get response from Groq
-      const response = await sendMessageToGroq([...messages, userMessage]);
+      const response = await sendMessageToGroq([...messages, userMessage], activeApiKey);
       
       // Artificial delay to simulate typing
       await new Promise(resolve => setTimeout(resolve, typingDelay));
@@ -125,13 +148,40 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onVoiceInputRequest }) =>
 
   return (
     <Card className="glass-card w-full max-w-3xl mx-auto shadow-lg">
-      <CardHeader className="border-b">
+      <CardHeader className="border-b flex flex-row items-center justify-between">
         <CardTitle className="text-xl font-medium text-center flex items-center justify-center gap-2">
           <Sparkles className="h-5 w-5 text-mind-blue" />
           Chat with Mindful Muse (Powered by Groq AI)
         </CardTitle>
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="hover:bg-slate-100"
+          onClick={() => setIsApiKeyDialogOpen(true)}
+        >
+          <Settings className="h-4 w-4" />
+        </Button>
       </CardHeader>
       <CardContent className="p-0">
+        {(!apiKey && !groqApiKey) && (
+          <div className="bg-amber-50 border-b border-amber-200 p-4 text-center">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <Key className="h-5 w-5 text-amber-500" />
+              <p className="font-medium text-amber-700">API Key Required</p>
+            </div>
+            <p className="text-sm text-amber-600 mb-2">Please set your Groq API key to enable full chat functionality.</p>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="text-amber-700 border-amber-300 bg-amber-50 hover:bg-amber-100"
+              onClick={() => setIsApiKeyDialogOpen(true)}
+            >
+              <Key className="h-4 w-4 mr-2" />
+              Set API Key
+            </Button>
+          </div>
+        )}
+        
         <ScrollArea className="h-[400px] px-4">
           <div className="space-y-4 py-4">
             {messages.map((message) => (
@@ -223,6 +273,34 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onVoiceInputRequest }) =>
           </div>
         </div>
       </CardFooter>
+      
+      <Dialog open={isApiKeyDialogOpen} onOpenChange={setIsApiKeyDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Set your Groq API Key</DialogTitle>
+            <DialogDescription>
+              Enter your Groq API key to enable AI chat features.
+              You can get an API key from <a href="https://console.groq.com/" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">Groq's website</a>.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="flex flex-col gap-2">
+              <Input
+                type="password"
+                placeholder="Enter your Groq API key"
+                value={groqApiKey}
+                onChange={(e) => setGroqApiKey(e.target.value)}
+              />
+              <p className="text-xs text-slate-500">Your API key is stored locally and never sent to our servers.</p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button type="submit" onClick={saveApiKey} disabled={!groqApiKey.trim()}>
+              Save Key
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };

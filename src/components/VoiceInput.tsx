@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from './ui/dialog';
-import { Mic, Square, Volume2, AlertCircle, VolumeX, Volume1 } from 'lucide-react';
+import { Mic, Square, Volume2, AlertCircle, VolumeX, Volume1, Key } from 'lucide-react';
 import { toast } from 'sonner';
 import { processVoiceInput } from '../services/groqService';
 
@@ -10,9 +10,10 @@ interface VoiceInputProps {
   isOpen: boolean;
   onClose: () => void;
   onTranscript: (text: string) => void;
+  apiKey?: string;
 }
 
-const VoiceInput: React.FC<VoiceInputProps> = ({ isOpen, onClose, onTranscript }) => {
+const VoiceInput: React.FC<VoiceInputProps> = ({ isOpen, onClose, onTranscript, apiKey }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [audioLevel, setAudioLevel] = useState(0);
@@ -31,6 +32,9 @@ const VoiceInput: React.FC<VoiceInputProps> = ({ isOpen, onClose, onTranscript }
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const microphoneStreamRef = useRef<MediaStream | null>(null);
+
+  const localApiKey = localStorage.getItem('groq_api_key') || '';
+  const effectiveApiKey = apiKey || localApiKey;
 
   useEffect(() => {
     if (isOpen) {
@@ -80,6 +84,15 @@ const VoiceInput: React.FC<VoiceInputProps> = ({ isOpen, onClose, onTranscript }
   };
 
   const handleStartRecording = async () => {
+    // Check for API key
+    if (!effectiveApiKey) {
+      toast.error("Groq API key is required for voice transcription", {
+        description: "Please set your API key in settings"
+      });
+      onClose();
+      return;
+    }
+    
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       microphoneStreamRef.current = stream;
@@ -107,7 +120,7 @@ const VoiceInput: React.FC<VoiceInputProps> = ({ isOpen, onClose, onTranscript }
         
         try {
           toast("Processing your voice with Groq AI...");
-          const transcript = await processVoiceInput(audioBlob);
+          const transcript = await processVoiceInput(audioBlob, effectiveApiKey);
           onTranscript(transcript);
           
           // Close the dialog after successful transcription
@@ -215,7 +228,24 @@ const VoiceInput: React.FC<VoiceInputProps> = ({ isOpen, onClose, onTranscript }
         </DialogHeader>
         
         <div className="flex flex-col items-center justify-center py-6">
-          {isRecording ? (
+          {!effectiveApiKey ? (
+            <div className="text-center">
+              <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center mb-4">
+                <Key className="h-8 w-8 text-amber-600" />
+              </div>
+              <h3 className="font-medium text-amber-800 mb-2">API Key Required</h3>
+              <p className="text-sm text-amber-700 mb-4">
+                Please set your Groq API key in settings to use voice features
+              </p>
+              <Button 
+                variant="outline" 
+                className="border-amber-300 text-amber-700 hover:bg-amber-50"
+                onClick={onClose}
+              >
+                Close
+              </Button>
+            </div>
+          ) : isRecording ? (
             <div className="text-center">
               <div className="w-24 h-24 rounded-full bg-red-100 flex items-center justify-center mb-4 relative"
                    style={{ transform: `scale(${1 + audioLevel/200})` }}>
@@ -260,14 +290,14 @@ const VoiceInput: React.FC<VoiceInputProps> = ({ isOpen, onClose, onTranscript }
             >
               <Square className="h-6 w-6" />
             </Button>
-          ) : (
+          ) : effectiveApiKey ? (
             <Button 
               className="rounded-full w-16 h-16 p-0 bg-mind-blue hover:bg-mind-blue/90 hover:scale-105 transition-transform" 
               onClick={handleStartRecording}
             >
               <Mic className="h-6 w-6" />
             </Button>
-          )}
+          ) : null}
         </DialogFooter>
       </DialogContent>
     </Dialog>
