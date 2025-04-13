@@ -6,7 +6,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './ui/card'
 import { Textarea } from './ui/textarea';
 import { ScrollArea } from './ui/scroll-area';
 import { sendMessageToGroq, analyzeText } from '../services/groqService';
-import { Mic, Send, RefreshCw, Sparkles, Clock } from 'lucide-react';
+import { Mic, Send, RefreshCw, Sparkles, Clock, HelpCircle, MessageSquare } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
@@ -19,14 +19,22 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onVoiceInputRequest }) =>
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 'welcome',
-      content: "Hello! I'm Mindful Muse powered by Groq AI. How are you feeling today?",
+      content: "Hello! I'm Mindful Muse powered by Groq AI. How are you feeling today? You can type your response or click the microphone icon to speak.",
       role: 'assistant',
       timestamp: new Date()
     }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  const suggestedPrompts = [
+    "I've been feeling anxious lately",
+    "How can I practice mindfulness?",
+    "I need some self-care ideas",
+    "What are some ways to reduce stress?"
+  ];
 
   useEffect(() => {
     scrollToBottom();
@@ -40,12 +48,13 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onVoiceInputRequest }) =>
     return formatDistanceToNow(timestamp, { addSuffix: true });
   };
 
-  const handleSendMessage = async () => {
-    if (!input.trim()) return;
+  const handleSendMessage = async (text?: string) => {
+    const messageToSend = text || input;
+    if (!messageToSend.trim()) return;
     
     const userMessage: Message = {
       id: uuidv4(),
-      content: input,
+      content: messageToSend,
       role: 'user',
       timestamp: new Date()
     };
@@ -53,13 +62,14 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onVoiceInputRequest }) =>
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
+    setShowSuggestions(false);
     
     try {
       // Simulate typing delay for more natural feeling
-      const typingDelay = Math.max(1000, Math.min(input.length * 30, 2000));
+      const typingDelay = Math.max(1000, Math.min(messageToSend.length * 30, 2000));
       
       // Analyze the text sentiment first using Groq
-      const analysis = await analyzeText(input);
+      const analysis = await analyzeText(messageToSend);
       
       // Get response from Groq
       const response = await sendMessageToGroq([...messages, userMessage]);
@@ -105,6 +115,13 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onVoiceInputRequest }) =>
       setIsLoading(false);
     }
   };
+  
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
 
   return (
     <Card className="glass-card w-full max-w-3xl mx-auto shadow-lg">
@@ -125,8 +142,8 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onVoiceInputRequest }) =>
                 <div 
                   className={`rounded-2xl px-4 py-3 max-w-[80%] ${
                     message.role === 'user' 
-                      ? 'bg-mind-blue text-white ml-12' 
-                      : 'bg-slate-100 text-slate-800 mr-12'
+                      ? 'bg-mind-blue text-white ml-12 hover:shadow-md transition-shadow' 
+                      : 'bg-slate-100 text-slate-800 mr-12 hover:shadow-sm transition-shadow'
                   }`}
                 >
                   <div className="flex flex-col">
@@ -153,25 +170,36 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onVoiceInputRequest }) =>
           </div>
         </ScrollArea>
       </CardContent>
-      <CardFooter className="border-t p-4">
+      <CardFooter className="border-t p-4 flex-col">
+        {showSuggestions && (
+          <div className="grid grid-cols-2 gap-2 w-full mb-3 fade-in">
+            {suggestedPrompts.map((prompt, index) => (
+              <Button
+                key={index}
+                variant="outline"
+                className="text-left h-auto py-2 text-sm justify-start hover:bg-mind-blue/10 hover:border-mind-blue/30"
+                onClick={() => handleSendMessage(prompt)}
+              >
+                <MessageSquare className="h-3 w-3 mr-2 flex-shrink-0" />
+                <span className="truncate">{prompt}</span>
+              </Button>
+            ))}
+          </div>
+        )}
+        
         <div className="flex w-full gap-2">
           <Textarea
             className="input-field flex-1 resize-none min-h-[60px]"
             placeholder="Type your message here..."
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                handleSendMessage();
-              }
-            }}
+            onKeyDown={handleKeyDown}
           />
           <div className="flex flex-col gap-2">
             <Button
-              className="bg-mind-blue hover:bg-mind-blue/90" 
+              className="bg-mind-blue hover:bg-mind-blue/90 hover:scale-105 transition-transform" 
               size="icon"
-              onClick={handleSendMessage}
+              onClick={() => handleSendMessage()}
               disabled={!input.trim() || isLoading}
             >
               <Send className="h-5 w-5" />
@@ -180,8 +208,17 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onVoiceInputRequest }) =>
               variant="outline"
               size="icon"
               onClick={onVoiceInputRequest}
+              className="hover:bg-mind-purple/10 hover:border-mind-purple/30 transition-colors"
             >
               <Mic className="h-5 w-5 text-mind-purple" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowSuggestions(!showSuggestions)}
+              className="hover:bg-mind-yellow/10 hover:border-mind-yellow/30 transition-colors"
+            >
+              <HelpCircle className="h-5 w-5 text-mind-yellow" />
             </Button>
           </div>
         </div>
