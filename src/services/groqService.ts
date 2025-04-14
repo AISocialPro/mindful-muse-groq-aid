@@ -1,14 +1,14 @@
 
 import { Message, GroqResponse, ImageAnalysis, TextAnalysis } from '../types';
 
+// Default Groq API key to use if user hasn't provided one
+const DEFAULT_GROQ_API_KEY = "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";
+
 export const sendMessageToGroq = async (messages: Message[], apiKey?: string): Promise<GroqResponse> => {
   try {
-    // Check if an API key is provided
-    if (!apiKey) {
-      console.warn('No Groq API key provided, using simulated response');
-      return simulateResponse(messages);
-    }
-
+    // Use provided API key or fall back to default
+    const activeApiKey = apiKey || DEFAULT_GROQ_API_KEY;
+    
     // Format messages for the API call
     const formattedMessages = messages.map(msg => ({
       role: msg.role,
@@ -21,7 +21,7 @@ export const sendMessageToGroq = async (messages: Message[], apiKey?: string): P
       const response = await fetch(GROQ_API_URL, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${apiKey}`,
+          'Authorization': `Bearer ${activeApiKey}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
@@ -92,9 +92,8 @@ const simulateResponse = (messages: Message[]): GroqResponse => {
 
 export const analyzeImage = async (imageBase64: string, apiKey?: string): Promise<ImageAnalysis> => {
   try {
-    if (!apiKey) {
-      throw new Error('No Groq API key provided');
-    }
+    // Use provided API key or fall back to default
+    const activeApiKey = apiKey || DEFAULT_GROQ_API_KEY;
 
     // Format the request for image analysis
     const systemMessage = {
@@ -116,7 +115,7 @@ export const analyzeImage = async (imageBase64: string, apiKey?: string): Promis
       const response = await fetch(GROQ_API_URL, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${apiKey}`,
+          'Authorization': `Bearer ${activeApiKey}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
@@ -192,9 +191,8 @@ const simulateImageAnalysis = (): ImageAnalysis => {
 
 export const analyzeText = async (text: string, apiKey?: string): Promise<TextAnalysis> => {
   try {
-    if (!apiKey) {
-      return simulateTextAnalysis(text);
-    }
+    // Use provided API key or fall back to default
+    const activeApiKey = apiKey || DEFAULT_GROQ_API_KEY;
 
     const systemMessage = {
       role: "system",
@@ -212,7 +210,7 @@ export const analyzeText = async (text: string, apiKey?: string): Promise<TextAn
       const response = await fetch(GROQ_API_URL, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${apiKey}`,
+          'Authorization': `Bearer ${activeApiKey}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
@@ -303,6 +301,9 @@ const simulateTextAnalysis = (text: string): TextAnalysis => {
 };
 
 export const processVoiceInput = async (audioBlob: Blob, apiKey?: string): Promise<string> => {
+  // Use provided API key or fall back to default
+  const activeApiKey = apiKey || DEFAULT_GROQ_API_KEY;
+  
   // In a real implementation, this would convert speech to text using Groq
   try {
     // Simulated response - in a real app, this would call the Groq API

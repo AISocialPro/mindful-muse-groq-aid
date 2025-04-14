@@ -5,7 +5,7 @@ import { Image as ImageIcon, PencilLine, Camera, FileImage, Settings } from 'luc
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 const ImageAnalysisPage = () => {
   const [groqApiKey, setGroqApiKey] = useState<string>(() => {
@@ -30,7 +30,7 @@ const ImageAnalysisPage = () => {
     localStorage.setItem('groq_api_key', groqApiKey);
     setIsApiKeyDialogOpen(false);
     toast.success("API key saved successfully!", {
-      description: "Your Groq API key has been saved for this session"
+      description: "Your custom Groq API key has been saved for this session"
     });
   };
 
@@ -48,6 +48,19 @@ const ImageAnalysisPage = () => {
           onClick={() => setIsApiKeyDialogOpen(true)}
         >
           <Settings className="h-5 w-5" />
+        </Button>
+      </div>
+      
+      <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-8 text-center">
+        <p className="text-amber-700 font-medium">Image analysis is active with the default API key</p>
+        <p className="text-sm text-amber-600 mb-2">You can also set your own Groq API key for personalized access</p>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="text-amber-700 border-amber-300 bg-amber-50 hover:bg-amber-100"
+          onClick={() => setIsApiKeyDialogOpen(true)}
+        >
+          Set Custom API Key
         </Button>
       </div>
       

@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Message } from '../types';
 import { Button } from './ui/button';
@@ -80,24 +79,14 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onVoiceInputRequest, apiK
     setShowSuggestions(false);
     
     try {
-      // Check if API key is available
       const activeApiKey = apiKey || groqApiKey;
-      if (!activeApiKey) {
-        toast.error("Please set your Groq API key in settings", {
-          description: "Click the settings icon to add your API key"
-        });
-      }
       
-      // Simulate typing delay for more natural feeling
       const typingDelay = Math.max(1000, Math.min(messageToSend.length * 30, 2000));
       
-      // Analyze the text sentiment first using Groq
       const analysis = await analyzeText(messageToSend, activeApiKey);
       
-      // Get response from Groq
       const response = await sendMessageToGroq([...messages, userMessage], activeApiKey);
       
-      // Artificial delay to simulate typing
       await new Promise(resolve => setTimeout(resolve, typingDelay));
       
       const aiMessage: Message = {
@@ -109,7 +98,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onVoiceInputRequest, apiK
       
       setMessages(prev => [...prev, aiMessage]);
       
-      // If the sentiment is negative, offer additional support
       if (analysis.sentiment === 'negative') {
         toast("I noticed you might be feeling down. Remember to be kind to yourself.", {
           description: "Would you like some self-care suggestions?",
@@ -167,9 +155,9 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onVoiceInputRequest, apiK
           <div className="bg-amber-50 border-b border-amber-200 p-4 text-center">
             <div className="flex items-center justify-center gap-2 mb-2">
               <Key className="h-5 w-5 text-amber-500" />
-              <p className="font-medium text-amber-700">API Key Required</p>
+              <p className="font-medium text-amber-700">Default API Key Active</p>
             </div>
-            <p className="text-sm text-amber-600 mb-2">Please set your Groq API key to enable full chat functionality.</p>
+            <p className="text-sm text-amber-600 mb-2">Chatbot is running with the default API key. You can also set your own Groq API key for personalized access.</p>
             <Button 
               variant="outline" 
               size="sm" 
@@ -177,7 +165,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onVoiceInputRequest, apiK
               onClick={() => setIsApiKeyDialogOpen(true)}
             >
               <Key className="h-4 w-4 mr-2" />
-              Set API Key
+              Set Custom API Key
             </Button>
           </div>
         )}
