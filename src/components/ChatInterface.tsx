@@ -67,11 +67,10 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onVoiceInputRequest, apiK
     setIsLoading(true);
 
     try {
-      // ✅ API KEY (YAHAN DALNI HAI)
       const activeApiKey =
         apiKey ||
         groqApiKey ||
-        "YOUR_GROQ_API_KEY"; // 🔥 replace here
+        "YOUR_GROQ_API_KEY"; 
 
       if (!activeApiKey) {
         toast.error("API key missing!");
